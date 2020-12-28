@@ -10,17 +10,9 @@
 
 #### 示例数据
 
-我们提供 CMRC2018 Dev中的数据作为示例
+CMRC2018 Dev
 
-真机示例程序[app.arm.apk](https://6a75-junzeng-uxxxm-1300734931.tcb.qcloud.la/app-armeabi-v7a-debug.apk?sign=483115f1519321a8ca59f2428cfe5153&t=1574871565)
 
-虚拟机示例程序[app.x86.apk](https://6a75-junzeng-uxxxm-1300734931.tcb.qcloud.la/app-debug.apk?sign=8e5eb09bcb0c46a525c7b1b8ea328946&t=1574871756)
-
-效果如下
-
-#### 下一步计划
-
-开发基于IOS coreml的示例程序
 
 
 
@@ -30,14 +22,12 @@
 
 - 安装 Android Studio （最新） [官网](https://developer.android.com/studio/index.html)
 
-- 你应该有一台Android设备，或者 虚拟器（建议修改虚拟机目录，贼大）
-
-  
+- 你应该有一台Android设备，或者 虚拟器
 
 #####  Android Studio步骤
 
 1. 打开 Android Studio  ，依次**File**  >>  **Open an existing Android Studio project**
-2. 等待哈
+2. 等待
 3. 选择运行设备，并点击运行
 4. gradle 下载预训练TFlite模型，并自动构建APP，并在目标设备上运行
 
@@ -59,7 +49,7 @@
 
 #### 模型转换过程
 
-[doing](#)
+[here](#)
 
 ---
 
@@ -72,7 +62,3 @@ Demo参考TFlite官方例子: [tensorflow/examples](https://github.com/tensorflo
 [BERT Tokenization For JAVA](https://github.com/zhongbin1/bert_tokenization_for_java)
 
 
-
-#### License
-
-[Apache License 2.0](LICENSE)
