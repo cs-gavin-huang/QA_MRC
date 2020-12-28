@@ -1,7 +1,7 @@
 '''
 Author: geekli
 Date: 2020-12-28 15:28:31
-LastEditTime: 2020-12-28 15:39:51
+LastEditTime: 2020-12-28 15:45:06
 LastEditors: your name
 Description: 
 FilePath: \QA_MRC\best_cn_finetune\utils.py
@@ -81,3 +81,71 @@ def get_assignment_map_from_checkpoint(tvars,init_checkpoint):
             new_variable_names.add(name)
     return assignment_map, initialized_variable_names, new_variable_names, unused_variable_names
 
+#loading weights
+def init_from_checkpoint(init_checkpoint,tvars=None,rank=0):
+    if not tvars:
+        tvars = tf.trainable_variables()
+    assignment_map, initialized_variable_names, new_variable_names, unused_variable_names \
+        = get_assignment_map_from_checkpoint(tvars,init_checkpoint)
+    tf.train.init_from_checkpoint(init_checkpoint,assignment_map)
+    if rank == 0:
+        # 显示成功加载的权重
+        for t in initialized_variable_names:
+            for ":0" not in t:
+                print("成功加载的权重: " + t)
+            
+         # 显示新的参数
+        print('新参数:', new_variable_names)
+
+        # 显示初始化参数中没用到的参数
+        print('没有使用的参数:', unused_variable_names)
+
+
+
+def torch_init_model(model, init_checkpoint):
+    state_dict = torch.load(init_checkpoint, map_location='cpu')
+    missing_keys = []
+    unexpected_keys = []
+    error_msgs = []
+    # copy state_dict so _load_from_state_dict can modify it
+    metadata = getattr(state_dict, '_metadata', None)
+    state_dict = state_dict.copy()
+    if metadata is not None:
+        state_dict._metadata = metadata
+
+    def load(module, prefix=''):
+        local_metadata = {} if metadata is None else metadata.get(prefix[:-1], {})
+
+        module._load_from_state_dict(
+            state_dict, prefix, local_metadata, True, missing_keys, unexpected_keys, error_msgs)
+        for name, child in module._modules.items():
+            if child is not None:
+                load(child, prefix + name + '.')
+
+    load(model, prefix='' if hasattr(model, 'bert') else 'bert.')
+
+    print("missing keys:{}".format(missing_keys))
+    print('unexpected keys:{}'.format(unexpected_keys))
+    print('error msgs:{}'.format(error_msgs))
+
+
+def torch_save_model(model, output_dir, scores, max_save_num=1):
+    # Save model checkpoint
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    model_to_save = model.module if hasattr(model, 'module') else model  # Take care of distributed/parallel training
+    saved_pths = glob(os.path.join(output_dir, '*.pth'))
+    saved_pths.sort()
+    while len(saved_pths) >= max_save_num:
+        if os.path.exists(saved_pths[0].replace('//', '/')):
+            os.remove(saved_pths[0].replace('//', '/'))
+            del saved_pths[0]
+
+    save_prex = "checkpoint_score"
+    for k in scores:
+        save_prex += ('_' + k + '-' + str(scores[k])[:6])
+    save_prex += '.pth'
+
+    torch.save(model_to_save.state_dict(),
+               os.path.join(output_dir, save_prex))
+    print("Saving model checkpoint to %s", output_dir)
